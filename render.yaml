@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: users-manager
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: DATABASE_URL
+        fromEnvVar: DATABASE_URL
+      - key: DB_NAME
+        fromEnvVar: DB_NAME
+      - key: DB_HOST
+        fromEnvVar: DB_HOST
+      - key: DB_PORT
+        fromEnvVar: DB_PORT
+      - key: DB_USERNAME
+        fromEnvVar: DB_USERNAME
+      - key: DB_PASSWORD
+        fromEnvVar: DB_PASSWORD
+      - key: JWT_SECRET
+        fromEnvVar: JWT_SECRET
+      - key: GOOGLE_CLIENT_ID
+        fromEnvVar: GOOGLE_CLIENT_ID
+      - key: GOOGLE_CLIENT_SECRET
+        fromEnvVar: GOOGLE_CLIENT_SECRET
+      - key: GOOGLE_CALLBACK_URL
+        fromEnvVar: GOOGLE_CALLBACK_URL
