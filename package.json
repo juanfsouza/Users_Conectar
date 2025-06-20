@@ -50,7 +50,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
-    "@nestjs/cli": "^11.0.0",
+    "@nestjs/cli": "^11.0.7",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.1.3",
     "@swc/cli": "^0.6.0",
@@ -73,12 +73,17 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.20.0",
-    "typeorm-ts-node-commonjs": "^0.3.25"
+    "typescript-eslint": "^8.20.0"
   },
   "jest": {
-    "moduleFileExtensions": ["js", "json", "ts"],
-    "roots": ["<rootDir>/test"],
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "roots": [
+      "<rootDir>/test"
+    ],
     "testMatch": [
       "**/unit/*.spec.ts",
       "**/e2e/*.e2e-spec.ts"
@@ -86,7 +91,9 @@
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
-    "collectCoverageFrom": ["<rootDir>/src/**/*.(t|j)s"],
+    "collectCoverageFrom": [
+      "<rootDir>/src/**/*.(t|j)s"
+    ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   }
