@@ -8,7 +8,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { User } from '../../src/domain/entities/user.entity';
+import { User } from '../domain/entities/user.entity';
 
 @Module({
   imports: [

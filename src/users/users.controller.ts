@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Patch, Delete, Body, Query, Param, UseGuards, HttpCode, HttpStatus, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../src/auth/guards/jwt-auth.guard';
-import { User } from '../../src/domain/entities/user.entity';
-import { CreateUserDto } from '../../src/infrastructure/http/dto/create-user.dto';
-import { UpdateUserDto } from '../../src/infrastructure/http/dto/update-user.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { User } from '../domain/entities/user.entity';
+import { CreateUserDto } from '../infrastructure/http/dto/create-user.dto';
+import { UpdateUserDto } from '../infrastructure/http/dto/update-user.dto';
 import { UsersService } from './users.service';
-import { ListUsersFilterDto } from '../../src/infrastructure/http/dto/list-users.dto';
+import { ListUsersFilterDto } from '../infrastructure/http/dto/list-users.dto';
 
 @ApiTags('users')
 @ApiBearerAuth()

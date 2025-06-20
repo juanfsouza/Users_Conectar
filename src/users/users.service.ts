@@ -1,15 +1,15 @@
 import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
-import { CreateUserUseCase } from '../../src/application/use-cases/create-user.use-case';
-import { ListUsersUseCase } from '../../src/application/use-cases/list-users.use-case';
-import { UpdateUserUseCase } from '../../src/application/use-cases/update-user.use-case';
-import { DeleteUserUseCase } from '../../src/application/use-cases/delete-user.use-case';
-import { GetInactiveUsersUseCase } from '../../src/application/use-cases/get-inactive-users.use-case';
+import { CreateUserUseCase } from '../application/use-cases/create-user.use-case';
+import { ListUsersUseCase } from '../application/use-cases/list-users.use-case';
+import { UpdateUserUseCase } from '../application/use-cases/update-user.use-case';
+import { DeleteUserUseCase } from '../application/use-cases/delete-user.use-case';
+import { GetInactiveUsersUseCase } from '../application/use-cases/get-inactive-users.use-case';
 import { User } from '../domain/entities/user.entity';
 import { plainToClass } from 'class-transformer';
 import { CreateUserDto } from '../infrastructure/http/dto/create-user.dto';
 import { UpdateUserDto } from '../infrastructure/http/dto/update-user.dto';
-import { FindUserUseCase } from '../../src/application/use-cases/find-user.use-case';
-import { ListUsersFilterDto } from '../../src/infrastructure/http/dto/list-users.dto';
+import { FindUserUseCase } from '../application/use-cases/find-user.use-case';
+import { ListUsersFilterDto } from '../infrastructure/http/dto/list-users.dto';
 
 @Injectable()
 export class UsersService {

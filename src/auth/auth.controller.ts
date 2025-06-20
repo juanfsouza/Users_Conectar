@@ -5,7 +5,7 @@ import { LoginDto } from './dto/login.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { Response, Request } from 'express';
-import { User } from '../../src/domain/entities/user.entity';
+import { User } from '../domain/entities/user.entity';
 
 @ApiTags('auth')
 @Controller('auth')

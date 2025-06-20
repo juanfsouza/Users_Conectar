@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersService } from './users.service';
-import { CreateUserUseCase } from '../../src/application/use-cases/create-user.use-case';
-import { DeleteUserUseCase } from '../../src/application/use-cases/delete-user.use-case';
-import { GetInactiveUsersUseCase } from '../../src/application/use-cases/get-inactive-users.use-case';
-import { ListUsersUseCase } from '../../src/application/use-cases/list-users.use-case';
-import { UpdateUserUseCase } from '../../src/application/use-cases/update-user.use-case';
-import { TypeOrmUserRepository } from '../../src/infrastructure/persistence/typeorm-user.repository';
+import { CreateUserUseCase } from '../application/use-cases/create-user.use-case';
+import { DeleteUserUseCase } from '../application/use-cases/delete-user.use-case';
+import { GetInactiveUsersUseCase } from '../application/use-cases/get-inactive-users.use-case';
+import { ListUsersUseCase } from '../application/use-cases/list-users.use-case';
+import { UpdateUserUseCase } from '../application/use-cases/update-user.use-case';
+import { TypeOrmUserRepository } from '../infrastructure/persistence/typeorm-user.repository';
 import { User } from '../domain/entities/user.entity';
-import { FindUserUseCase } from '../../src/application/use-cases/find-user.use-case';
+import { FindUserUseCase } from '../application/use-cases/find-user.use-case';
 import { UsersController } from './users.controller';
 
 @Module({
