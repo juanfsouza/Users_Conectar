@@ -23,7 +23,8 @@
     "migration:revert": "typeorm-ts-node-commonjs -d src/data-source.ts migration:revert",
     "typeorm": "typeorm-ts-node-commonjs -d src/data-source.ts",
     "prebuild": "rm -rf dist && mkdir dist",
-    "postdeploy": "typeorm-ts-node-commonjs -d dist/data-source.js migration:run"
+    "postdeploy": "typeorm-ts-node-commonjs -d dist/data-source.js migration:run",
+    "seed:admin": "ts-node src/seed/create-admin.seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -77,12 +78,15 @@
   },
   "jest": {
     "moduleFileExtensions": ["js", "json", "ts"],
-    "rootDir": "src",
-    "testRegex": ".*\\.spec\\.ts$",
+    "roots": ["<rootDir>/test"],
+    "testMatch": [
+      "**/unit/*.spec.ts",
+      "**/e2e/*.e2e-spec.ts"
+    ],
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
-    "collectCoverageFrom": ["**/*.(t|j)s"],
+    "collectCoverageFrom": ["<rootDir>/src/**/*.(t|j)s"],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   }

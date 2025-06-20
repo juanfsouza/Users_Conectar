@@ -5,7 +5,7 @@ import { LoginDto } from './dto/login.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { Response, Request } from 'express';
-import { User } from 'src/domain/entities/user.entity';
+import { User } from '../../src/domain/entities/user.entity';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -40,7 +40,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Successfully authenticated with Google' })
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
     const user: User = req.user;
-    const token = await this.authService.login({ email: user.email, password: '' }); // Password is not used for OAuth
+    const token = await this.authService.login({ email: user.email, password: '' });
     res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${token.accessToken}`);
   }
 }
