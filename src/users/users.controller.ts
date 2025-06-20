@@ -1,4 +1,68 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Query, Param, UseGuards, HttpCode, HttpStatus, Request } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { User } from 'src/domain/entities/user.entity';
+import { CreateUserDto } from 'src/infrastructure/http/dto/create-user.dto';
+import { UpdateUserDto } from 'src/infrastructure/http/dto/update-user.dto';
+import { UsersService } from './users.service';
+import { ListUsersFilterDto } from 'src/infrastructure/http/dto/list-users.dto';
 
+@ApiTags('users')
+@ApiBearerAuth()
 @Controller('users')
-export class UsersController {}
+@UseGuards(JwtAuthGuard)
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Create a new user' })
+  @ApiResponse({ status: 201, description: 'User created successfully' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  async create(@Body() createUserDto: CreateUserDto, @Request() req): Promise<User> {
+    return this.usersService.create(createUserDto, req.user);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'List all users (admin only)' })
+  @ApiResponse({ status: 200, description: 'List of users' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  async findAll(@Query() listUsersFilterDto: ListUsersFilterDto, @Request() req): Promise<{ users: User[]; total: number }> {
+    return this.usersService.findAll(listUsersFilterDto, req.user);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get user by ID' })
+  @ApiResponse({ status: 200, description: 'User found' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async findById(@Param('id') id: string, @Request() req): Promise<User> {
+    return this.usersService.findById(id, req.user);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update user by ID' })
+  @ApiResponse({ status: 200, description: 'User updated successfully' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Request() req): Promise<User> {
+    return this.usersService.update(id, updateUserDto, req.user);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete user by ID (admin only)' })
+  @ApiResponse({ status: 204, description: 'User deleted successfully' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async delete(@Param('id') id: string, @Request() req): Promise<void> {
+    return this.usersService.delete(id, req.user);
+  }
+
+  @Get('inactive')
+  @ApiOperation({ summary: 'List inactive users (admin only)' })
+  @ApiResponse({ status: 200, description: 'List of inactive users' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  async findInactiveUsers(@Request() req): Promise<User[]> {
+    return this.usersService.findInactiveUsers(req.user);
+  }
+}

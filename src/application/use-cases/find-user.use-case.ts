@@ -1,25 +1,19 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { IUserRepository } from '../../domain/interfaces/user.repository.interface';
 import { User } from '../../domain/entities/user.entity';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class UpdateUserUseCase {
+export class FindUserUseCase {
   constructor(
     @Inject('IUserRepository')
     private readonly userRepository: IUserRepository,
   ) {}
 
-  async execute(id: string, user: Partial<User>): Promise<User> {
-    const existingUser = await this.userRepository.findById(id);
-    if (!existingUser) {
+  async execute(id: string): Promise<User> {
+    const user = await this.userRepository.findById(id);
+    if (!user) {
       throw new NotFoundException('User not found');
     }
-
-    if (user.password) {
-      user.password = await bcrypt.hash(user.password, 10);
-    }
-
-    return this.userRepository.update(id, user);
+    return user;
   }
 }
