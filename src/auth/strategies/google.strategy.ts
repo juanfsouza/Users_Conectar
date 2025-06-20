@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../domain/entities/user.entity';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy) {
@@ -16,7 +17,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
     super({
       clientID: configService.get<string>('GOOGLE_CLIENT_ID') || 'your-google-client-id',
       clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET') || 'your-google-client-secret',
-      callbackURL: configService.get<string>('GOOGLE_CALLBACK_URL') || 'https://users-conectar.onrender.com/auth/google/callback',
+      callbackURL:
+        configService.get<string>('GOOGLE_CALLBACK_URL') ||
+        'https://users-conectar.onrender.com/api/auth/google/callback',
       scope: ['email', 'profile'],
     });
   }
@@ -36,7 +39,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
         name: name?.givenName || profile.displayName,
         email,
         role: 'user',
-        password: undefined,
+        password: crypto.randomUUID(),
       });
       await this.userRepository.save(user);
     }
