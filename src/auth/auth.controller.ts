@@ -8,7 +8,7 @@ import { Response, Request } from 'express';
 import { User } from '../domain/entities/user.entity';
 
 @ApiTags('auth')
-@Controller('auth')
+@Controller('api/auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
