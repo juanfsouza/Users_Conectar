@@ -6,6 +6,7 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { Response, Request } from 'express';
 import { User } from '../domain/entities/user.entity';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -25,8 +26,38 @@ export class AuthController {
   @ApiOperation({ summary: 'Login a user' })
   @ApiResponse({ status: 200, description: 'User successfully logged in' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  async login(
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const { accessToken } = await this.authService.login(loginDto);
+
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 1000 * 60 * 60,
+    });
+
+    return { message: 'Login successful' };
+  }
+
+  @Get('me')
+  @ApiOperation({ summary: 'Get current authenticated user' })
+  @ApiResponse({ status: 200, description: 'User found' })
+  @UseGuards(JwtAuthGuard)
+  getMe(@Req() req: Request): User {
+    if (!req.user) {
+      throw new Error('User not found in request');
+    }
+    return req.user as User;
+  }
+
+  @Post('logout')
+  @HttpCode(200)
+  logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('accessToken');
+    return { message: 'Logout successful' };
   }
 
   @Get('google')
@@ -41,6 +72,6 @@ export class AuthController {
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
     const user: User = req.user;
     const token = await this.authService.login({ email: user.email, password: '' });
-    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/callback?token=${token.accessToken}`);
+    res.redirect(`${process.env.FRONTEND_URL}`);
   }
 }
