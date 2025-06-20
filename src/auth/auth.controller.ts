@@ -7,11 +7,15 @@ import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { Response, Request } from 'express';
 import { User } from '../domain/entities/user.entity';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { JwtService } from '@nestjs/jwt';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private jwtService: JwtService,
+  ) {}
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
@@ -28,7 +32,7 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(
     @Body() loginDto: LoginDto,
-    @Res({ passthrough: true }) res: Response
+    @Res({ passthrough: true }) res: Response,
   ) {
     const { accessToken } = await this.authService.login(loginDto);
 
@@ -39,7 +43,7 @@ export class AuthController {
       maxAge: 1000 * 60 * 60,
     });
 
-    return { message: 'Login successful' };
+    return { accessToken };
   }
 
   @Get('me')
@@ -47,9 +51,6 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'User found' })
   @UseGuards(JwtAuthGuard)
   getMe(@Req() req: Request): User {
-    if (!req.user) {
-      throw new Error('User not found in request');
-    }
     return req.user as User;
   }
 
@@ -63,15 +64,23 @@ export class AuthController {
   @Get('google')
   @UseGuards(GoogleAuthGuard)
   @ApiOperation({ summary: 'Initiate Google OAuth login' })
-  async googleAuth(@Req() req) {}
+  async googleAuth() {
+  }
 
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   @ApiOperation({ summary: 'Google OAuth callback' })
-  @ApiResponse({ status: 200, description: 'Successfully authenticated with Google' })
+  @ApiResponse({
+    status: 200,
+    description: 'Successfully authenticated with Google',
+  })
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
     const user: User = req.user;
-    const token = await this.authService.login({ email: user.email, password: '' });
-    res.redirect(`${process.env.FRONTEND_URL}`);
+
+    const payload = { sub: user.id, email: user.email };
+    const accessToken = this.jwtService.sign(payload);
+
+    const redirectUrl = `${process.env.FRONTEND_URL}/?token=${accessToken}`;
+    return res.redirect(redirectUrl);
   }
 }
