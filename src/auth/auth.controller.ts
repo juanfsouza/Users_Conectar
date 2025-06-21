@@ -76,11 +76,16 @@ export class AuthController {
   })
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
     const user: User = req.user;
-
     const payload = { sub: user.id, email: user.email };
     const accessToken = this.jwtService.sign(payload);
 
-    const redirectUrl = `${process.env.FRONTEND_URL}/?token=${accessToken}`;
-    return res.redirect(redirectUrl);
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 1000 * 60 * 60,
+    });
+
+    return res.redirect(process.env.FRONTEND_URL || 'http://localhost:3000/dashboard');
   }
 }
