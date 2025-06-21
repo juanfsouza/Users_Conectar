@@ -11,7 +11,17 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.enableCors({
-    origin: ['https://users-manager-frontend.vercel.app'],
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        'https://users-manager-frontend.vercel.app',
+        'http://localhost:3000',
+      ];
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   });
 
