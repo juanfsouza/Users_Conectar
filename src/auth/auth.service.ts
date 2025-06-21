@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../domain/entities/user.entity';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { CreateAdminDto } from './dto/create-admin.dto';
 
 @Injectable()
 export class AuthService {
@@ -37,7 +38,10 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<{ accessToken: string }> {
     const { email, password } = loginDto;
     console.log('Looking for user with email:', email);
-    const user = await this.usersRepository.findOne({ where: { email } });
+    const user = await this.usersRepository
+      .createQueryBuilder('user')
+      .where('LOWER(user.email) = LOWER(:email)', { email })
+      .getOne();
     console.log('User found:', user ? { id: user.id, email: user.email, role: user.role } : null);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -56,5 +60,26 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
 
     return { accessToken };
+  }
+
+  async createAdmin(createAdminDto: CreateAdminDto): Promise<User> {
+    const { name, email, password } = createAdminDto;
+
+    const existingUser = await this.usersRepository.findOne({ where: { email } });
+    if (existingUser) {
+      throw new BadRequestException('Email already exists');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = this.usersRepository.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: 'admin',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    return this.usersRepository.save(user);
   }
 }

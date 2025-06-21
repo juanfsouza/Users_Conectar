@@ -8,6 +8,7 @@ import { Response, Request } from 'express';
 import { User } from '../domain/entities/user.entity';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
+import { CreateAdminDto } from './dto/create-admin.dto'; // New DTO
 
 @ApiTags('auth')
 @Controller('auth')
@@ -64,8 +65,7 @@ export class AuthController {
   @Get('google')
   @UseGuards(GoogleAuthGuard)
   @ApiOperation({ summary: 'Initiate Google OAuth login' })
-  async googleAuth() {
-  }
+  async googleAuth() {}
 
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
@@ -76,7 +76,7 @@ export class AuthController {
   })
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
     const user: User = req.user;
-    const payload = { sub: user.id, email: user.email };
+    const payload = { sub: user.id, email: user.email, role: user.role };
     const accessToken = this.jwtService.sign(payload);
 
     res.cookie('accessToken', accessToken, {
@@ -86,6 +86,15 @@ export class AuthController {
       maxAge: 1000 * 60 * 60,
     });
 
-    return res.redirect(process.env.FRONTEND_URL || 'http://localhost:3000/dashboard');
+    return res.redirect(`${process.env.FRONTEND_URL}/dashboard?googleLogin=success`);
+  }
+
+  @Post('create-admin')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create an admin user (temporary)' })
+  @ApiResponse({ status: 201, description: 'Admin user created' })
+  @ApiResponse({ status: 400, description: 'Email already exists' })
+  async createAdmin(@Body() createAdminDto: CreateAdminDto) {
+    return this.authService.createAdmin(createAdminDto);
   }
 }
