@@ -83,7 +83,7 @@ export class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      maxAge: 1000 * 60 * 60,
+      maxAge: 1000 * 60 * 60, 
     });
 
     return res.redirect(process.env.FRONTEND_URL || 'http://localhost:3000/dashboard');
