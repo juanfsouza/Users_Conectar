@@ -11,8 +11,11 @@ import { UsersModule } from './users/users.module';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        url: configService.get<string>('DATABASE_URL'),
-        ssl: { rejectUnauthorized: false },
+        host: configService.get<string>('DB_HOST') || 'localhost',
+        port: configService.get<number>('DB_PORT') || 5432,
+        username: configService.get<string>('DB_USERNAME') || 'postgres',
+        password: configService.get<string>('DB_PASSWORD') || '123',
+        database: configService.get<string>('DB_NAME') || 'connectar',
         synchronize: false,
         logging: true,
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
