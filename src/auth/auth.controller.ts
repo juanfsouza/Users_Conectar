@@ -83,6 +83,7 @@ export class AuthController {
   })
   async googleAuthRedirect(@Req() req, @Res() res: Response) {
     const user: User = req.user;
+    await this.authService.updateLastLoginForUser(user.id);
     const payload = { sub: user.id, email: user.email, role: user.role };
     const accessToken = this.jwtService.sign(payload);
 

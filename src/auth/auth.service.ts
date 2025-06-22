@@ -82,4 +82,12 @@ export class AuthService {
 
     return this.usersRepository.save(user);
   }
+
+  async updateLastLoginForUser(userId: string): Promise<void> {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (user) {
+      user.lastLogin = new Date();
+      await this.usersRepository.save(user);
+    }
+  }
 }
