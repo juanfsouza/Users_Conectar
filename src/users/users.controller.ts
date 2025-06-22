@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Query, Param, UseGuards, HttpCode, HttpStatus, Request, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Query, Param, UseGuards, HttpCode, HttpStatus, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { User } from '../domain/entities/user.entity';
@@ -30,6 +30,15 @@ export class UsersController {
     return this.usersService.findAll(listUsersFilterDto, req.user);
   }
 
+  @Get('inactive')
+  @ApiOperation({ summary: 'List inactive users (admin only)' })
+  @ApiResponse({ status: 200, description: 'List of inactive users' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  async findInactiveUsers(@Request() req): Promise<User[]> {
+    console.log('Inactive users request with user:', req.user);
+    return this.usersService.findInactiveUsers(req.user);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get user by ID' })
   @ApiResponse({ status: 200, description: 'User found' })
@@ -45,9 +54,7 @@ export class UsersController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'User not found' })
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Request() req): Promise<User> {
-    const updatedUser = await this.usersService.update(id, updateUserDto, req.user);
-    console.log('UsersController - Updated user response:', updatedUser);
-    return updatedUser;
+    return this.usersService.update(id, updateUserDto, req.user);
   }
 
   @Delete(':id')
@@ -58,18 +65,5 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'User not found' })
   async delete(@Param('id') id: string, @Request() req): Promise<void> {
     return this.usersService.delete(id, req.user);
-  }
-
-  @Get('inactive')
-  @ApiOperation({ summary: 'List inactive users (admin only)' })
-  @ApiResponse({ status: 200, description: 'List of inactive users' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  async findInactiveUsers(@Request() req): Promise<User[]> {
-    console.log('Request user:', req.user);
-    if (req.user.role !== 'admin') {
-      throw new ForbiddenException('Only admins can view inactive users');
-    }
-    const inactiveUsers = await this.usersService.findAll({ limit: 100 }, req.user);
-    return inactiveUsers.users.filter(user => !user.lastLogin || new Date(user.lastLogin) < new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
   }
 }
