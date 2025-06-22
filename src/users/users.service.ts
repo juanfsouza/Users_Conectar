@@ -73,6 +73,11 @@ export class UsersService {
     if (currentUser.role !== 'admin') {
       throw new ForbiddenException('Only admins can view inactive users');
     }
-    return this.getInactiveUsersUseCase.execute(30);
+    try {
+      return await this.getInactiveUsersUseCase.execute(30);
+    } catch (error) {
+      console.error('Error fetching inactive users:', error);
+      return [];
+    }
   }
 }

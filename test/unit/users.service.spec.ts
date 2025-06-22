@@ -11,12 +11,16 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { CreateUserDto } from '../../src/infrastructure/http/dto/create-user.dto';
 import { UpdateUserDto } from '../../src/infrastructure/http/dto/update-user.dto';
+import { ListUsersFilterDto } from '../../src/infrastructure/http/dto/list-users.dto';
 
 describe('UsersService', () => {
   let service: UsersService;
   let createUserUseCase: CreateUserUseCase;
-  let findUserUseCase: FindUserUseCase;
+  let listUsersUseCase: ListUsersUseCase;
   let updateUserUseCase: UpdateUserUseCase;
+  let deleteUserUseCase: DeleteUserUseCase;
+  let getInactiveUsersUseCase: GetInactiveUsersUseCase;
+  let findUserUseCase: FindUserUseCase;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -25,38 +29,52 @@ describe('UsersService', () => {
         {
           provide: CreateUserUseCase,
           useValue: {
-            execute: jest.fn(),
+            execute: jest.fn().mockImplementation((user: User) => Promise.resolve(user)),
           },
         },
         {
           provide: ListUsersUseCase,
           useValue: {
-            execute: jest.fn(),
+            execute: jest.fn().mockImplementation((filter: ListUsersFilterDto, user: User) => {
+              if (user.role !== 'admin') throw new ForbiddenException();
+              return Promise.resolve({ users: [], total: 0 });
+            }),
           },
         },
         {
           provide: UpdateUserUseCase,
-          useValue: { execute: jest.fn() },
+          useValue: {
+            execute: jest.fn().mockImplementation((id: string, user: User) => Promise.resolve(user)),
+          },
         },
         {
           provide: DeleteUserUseCase,
-          useValue: { execute: jest.fn() },
+          useValue: {
+            execute: jest.fn().mockImplementation((id: string) => Promise.resolve()),
+          },
         },
         {
           provide: GetInactiveUsersUseCase,
-          useValue: { execute: jest.fn() },
+          useValue: {
+            execute: jest.fn().mockImplementation(() => Promise.resolve([])),
+          },
         },
         {
           provide: FindUserUseCase,
-          useValue: { execute: jest.fn() },
+          useValue: {
+            execute: jest.fn().mockImplementation((id: string) => Promise.resolve({ id } as User)),
+          },
         },
       ],
     }).compile();
 
     service = module.get<UsersService>(UsersService);
     createUserUseCase = module.get<CreateUserUseCase>(CreateUserUseCase);
-    findUserUseCase = module.get<FindUserUseCase>(FindUserUseCase);
+    listUsersUseCase = module.get<ListUsersUseCase>(ListUsersUseCase);
     updateUserUseCase = module.get<UpdateUserUseCase>(UpdateUserUseCase);
+    deleteUserUseCase = module.get<DeleteUserUseCase>(DeleteUserUseCase);
+    getInactiveUsersUseCase = module.get<GetInactiveUsersUseCase>(GetInactiveUsersUseCase);
+    findUserUseCase = module.get<FindUserUseCase>(FindUserUseCase);
   });
 
   it('should be defined', () => {
@@ -74,16 +92,81 @@ describe('UsersService', () => {
     expect(result).toEqual(user);
   });
 
+  it('should throw ForbiddenException for non-admin creating admin', async () => {
+    const createUserDto: CreateUserDto = { name: 'Test', email: 'test@example.com', password: 'password', role: 'admin' };
+    const user = plainToClass(User, createUserDto, { excludeExtraneousValues: true }) as User;
+    const currentUser = { role: 'user', id: '1' } as User;
+    await expect(service.create(createUserDto, currentUser)).rejects.toThrow(ForbiddenException);
+  });
+
+  it('should list users', async () => {
+    const users = [{ id: '1', name: 'Test', email: 'test@example.com', role: 'user', createdAt: new Date(), updatedAt: new Date() }] as User[];
+    const currentUser = { role: 'admin', id: '1' } as User;
+    jest.spyOn(listUsersUseCase, 'execute').mockResolvedValue({ users, total: 1 });
+
+    const result = await service.findAll({} as ListUsersFilterDto, currentUser);
+    expect(listUsersUseCase.execute).toHaveBeenCalled();
+    expect(result).toEqual({ users, total: 1 });
+  });
+
   it('should throw ForbiddenException for non-admin listing users', async () => {
     const currentUser = { role: 'user', id: '1' } as User;
-    await expect(service.findAll({}, currentUser)).rejects.toThrow(ForbiddenException);
+    await expect(service.findAll({} as ListUsersFilterDto, currentUser)).rejects.toThrow(ForbiddenException);
+  });
+
+  it('should update user', async () => {
+    const updateUserDto: UpdateUserDto = { name: 'Updated' };
+    const user = { id: '1', name: 'Updated', email: 'test@example.com', role: 'user', createdAt: new Date(), updatedAt: new Date() } as User;
+    const currentUser = { role: 'admin', id: '1' } as User;
+    jest.spyOn(findUserUseCase, 'execute').mockResolvedValue(user);
+    jest.spyOn(updateUserUseCase, 'execute').mockResolvedValue(user);
+
+    const result = await service.update('1', updateUserDto, currentUser);
+    expect(updateUserUseCase.execute).toHaveBeenCalledWith('1', expect.any(Object));
+    expect(result).toEqual(user);
+  });
+
+  it('should throw ForbiddenException for non-admin updating user role', async () => {
+    const updateUserDto: UpdateUserDto = { role: 'admin' };
+    const currentUser = { role: 'user', id: '1' } as User;
+    jest.spyOn(findUserUseCase, 'execute').mockResolvedValue({ id: '1', role: 'user' } as User);
+
+    await expect(service.update('1', updateUserDto, currentUser)).rejects.toThrow(ForbiddenException);
   });
 
   it('should throw NotFoundException for non-existent user update', async () => {
-    const currentUser = { role: 'admin', id: '1' } as User;
     const updateUserDto: UpdateUserDto = { name: 'Updated' };
-    jest.spyOn(findUserUseCase, 'execute').mockResolvedValue(null as unknown as User);
+    const currentUser = { role: 'admin', id: '1' } as User;
+    jest.spyOn(findUserUseCase, 'execute').mockResolvedValue(Promise.resolve(null as unknown as User));
 
     await expect(service.update('1', updateUserDto, currentUser)).rejects.toThrow(NotFoundException);
+  });
+
+  it('should delete user', async () => {
+    const currentUser = { role: 'admin', id: '1' } as User;
+    jest.spyOn(deleteUserUseCase, 'execute').mockResolvedValue();
+
+    await service.delete('1', currentUser);
+    expect(deleteUserUseCase.execute).toHaveBeenCalledWith('1');
+  });
+
+  it('should throw ForbiddenException for non-admin deleting user', async () => {
+    const currentUser = { role: 'user', id: '1' } as User;
+    await expect(service.delete('1', currentUser)).rejects.toThrow(ForbiddenException);
+  });
+
+  it('should list inactive users', async () => {
+    const users = [{ id: '1', name: 'Inactive', email: 'inactive@example.com', role: 'user', createdAt: new Date(), updatedAt: new Date() }] as User[];
+    const currentUser = { role: 'admin', id: '1' } as User;
+    jest.spyOn(getInactiveUsersUseCase, 'execute').mockResolvedValue(users);
+
+    const result = await service.findInactiveUsers(currentUser);
+    expect(getInactiveUsersUseCase.execute).toHaveBeenCalled();
+    expect(result).toEqual(users);
+  });
+
+  it('should throw ForbiddenException for non-admin listing inactive users', async () => {
+    const currentUser = { role: 'user', id: '1' } as User;
+    await expect(service.findInactiveUsers(currentUser)).rejects.toThrow(ForbiddenException);
   });
 });

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan } from 'typeorm';
+import { Repository, LessThan, IsNull } from 'typeorm';
 import { User } from '../../domain/entities/user.entity';
 import { IUserRepository } from '../../domain/interfaces/user.repository.interface';
 
@@ -55,7 +55,10 @@ export class TypeOrmUserRepository implements IUserRepository {
     const date = new Date();
     date.setDate(date.getDate() - days);
     return this.userRepository.find({
-      where: { lastLogin: LessThan(date) },
+      where: [
+        { lastLogin: LessThan(date) },
+        { lastLogin: IsNull() },
+      ],
     });
   }
 }

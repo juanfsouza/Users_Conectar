@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JwtAuthGuard } from '../../src/auth/guards/jwt-auth.guard';
 import { User } from '../../src/domain/entities/user.entity';
 import { CreateUserDto } from '../../src/infrastructure/http/dto/create-user.dto';
+import { UpdateUserDto } from '../../src/infrastructure/http/dto/update-user.dto';
 import { UsersController } from '../../src/users/users.controller';
 import { UsersService } from '../../src/users/users.service';
 
@@ -64,5 +65,31 @@ describe('UsersController', () => {
     const result = await controller.findById('1', { user: { role: 'admin', id: '1' } } as any);
     expect(service.findById).toHaveBeenCalledWith('1', expect.any(Object));
     expect(result).toEqual(user);
+  });
+
+  it('should update user', async () => {
+    const user: User = { id: '1', name: 'Updated', email: 'test@example.com', role: 'user', createdAt: new Date(), updatedAt: new Date() } as User;
+    const updateDto: UpdateUserDto = { name: 'Updated' };
+    jest.spyOn(service, 'update').mockResolvedValue(user);
+
+    const result = await controller.update('1', updateDto, { user: { role: 'admin', id: '1' } } as any);
+    expect(service.update).toHaveBeenCalledWith('1', updateDto, expect.any(Object));
+    expect(result).toEqual(user);
+  });
+
+  it('should delete user', async () => {
+    jest.spyOn(service, 'delete').mockResolvedValue();
+
+    await controller.delete('1', { user: { role: 'admin', id: '1' } } as any);
+    expect(service.delete).toHaveBeenCalledWith('1', expect.any(Object));
+  });
+
+  it('should list inactive users', async () => {
+    const users = [{ id: '1', name: 'Inactive', email: 'inactive@example.com', role: 'user', createdAt: new Date(), updatedAt: new Date() }] as User[];
+    jest.spyOn(service, 'findInactiveUsers').mockResolvedValue(users);
+
+    const result = await controller.findInactiveUsers({ user: { role: 'admin', id: '1' } } as any);
+    expect(service.findInactiveUsers).toHaveBeenCalled();
+    expect(result).toEqual(users);
   });
 });
