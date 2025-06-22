@@ -1,8 +1,10 @@
+// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { UpdateLastLoginMiddleware } from './middlewares/update-last-login.middleware';
 
 @Module({
   imports: [
@@ -26,5 +28,6 @@ import { UsersModule } from './users/users.module';
     AuthModule,
     UsersModule,
   ],
+  providers: [UpdateLastLoginMiddleware],
 })
 export class AppModule {}
