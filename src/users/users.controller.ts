@@ -69,8 +69,7 @@ export class UsersController {
     if (req.user.role !== 'admin') {
       throw new ForbiddenException('Only admins can view inactive users');
     }
-    // Lógica simplificada para teste
-    const inactiveUsers = await this.usersService.findAll({ limit: 100 }, req.user); // Busca todos os usuários
+    const inactiveUsers = await this.usersService.findAll({ limit: 100 }, req.user);
     return inactiveUsers.users.filter(user => !user.lastLogin || new Date(user.lastLogin) < new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
   }
 }
