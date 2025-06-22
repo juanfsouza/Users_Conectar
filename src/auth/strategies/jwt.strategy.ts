@@ -2,22 +2,18 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { User } from '../../domain/entities/user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { validate as uuidValidate } from 'uuid';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    configService: ConfigService,
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
-  ) {
+  constructor(private configService: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([(req) => {
+        console.log('Extracting token from request:', req?.cookies);
         let token = null;
         if (req && req.cookies) {
           token = req.cookies['accessToken'];
+          console.log('Extracted token:', token);
         }
         return token;
       }]),
@@ -26,13 +22,20 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any): Promise<User> {
-    const { sub: id } = payload;
-    console.log('JWT Payload:', payload);
-    const user = await this.usersRepository.findOneBy({ id });
-    if (!user) {
-      throw new UnauthorizedException();
+  async validate(payload: any): Promise<{ id: string; email: string; role: string }> {
+    console.log('Validating JWT payload:', payload);
+    const { sub: id, email, role } = payload;
+
+    if (!id || !uuidValidate(id)) {
+      console.error('Invalid UUID in payload:', id);
+      throw new UnauthorizedException('Invalid user ID in token');
     }
-    return user;
+
+    if (!email || !role) {
+      console.error('Missing required fields in payload:', payload);
+      throw new UnauthorizedException('Invalid token payload');
+    }
+
+    return { id, email, role };
   }
 }

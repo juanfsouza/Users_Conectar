@@ -22,6 +22,7 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto, currentUser: { id: string; role: string; email: string }): Promise<User> {
+    console.log('Creating user with currentUser:', currentUser);
     if (currentUser.role !== 'admin' && createUserDto.role === 'admin') {
       throw new ForbiddenException('Only admins can create admin users');
     }
@@ -30,6 +31,7 @@ export class UsersService {
   }
 
   async findAll(filters: ListUsersFilterDto, currentUser: { id: string; role: string; email: string }): Promise<{ users: User[]; total: number }> {
+    console.log('Finding all users with currentUser:', currentUser);
     if (currentUser.role !== 'admin') {
       throw new ForbiddenException('Only admins can list all users');
     }
@@ -43,6 +45,7 @@ export class UsersService {
   }
 
   async findById(id: string, currentUser: { id: string; role: string; email: string }): Promise<User> {
+    console.log('Finding user by id:', id, 'with currentUser:', currentUser);
     if (!uuidValidate(id)) {
       throw new NotFoundException('Invalid user ID');
     }
@@ -57,6 +60,7 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto, currentUser: { id: string; role: string; email: string }): Promise<User> {
+    console.log('Updating user with id:', id, 'currentUser:', currentUser);
     if (!uuidValidate(id)) {
       throw new NotFoundException('Invalid user ID');
     }
@@ -72,6 +76,7 @@ export class UsersService {
   }
 
   async delete(id: string, currentUser: { id: string; role: string; email: string }): Promise<void> {
+    console.log('Deleting user with id:', id, 'currentUser:', currentUser);
     if (currentUser.role !== 'admin') {
       throw new ForbiddenException('Only admins can delete users');
     }
@@ -79,17 +84,22 @@ export class UsersService {
   }
 
   async findInactiveUsers(currentUser: { id: string; role: string; email: string }): Promise<User[]> {
-    console.log('Fetching inactive users for user:', currentUser.email);
-    if (currentUser.role !== 'admin') {
+    console.log('findInactiveUsers called with currentUser:', currentUser);
+    if (!currentUser || currentUser.role !== 'admin') {
       throw new ForbiddenException('Only admins can view inactive users');
     }
     const dateThreshold = new Date();
     dateThreshold.setDate(dateThreshold.getDate() - 30);
-    const inactiveUsers = await this.userRepository
-      .createQueryBuilder('user')
-      .where('user.lastLogin IS NULL OR user.lastLogin < :date', { date: dateThreshold })
-      .getMany();
-    console.log('Inactive users fetched:', inactiveUsers);
-    return inactiveUsers;
+    try {
+      const inactiveUsers = await this.userRepository
+        .createQueryBuilder('user')
+        .where('user.lastLogin IS NULL OR user.lastLogin < :date', { date: dateThreshold })
+        .getMany();
+      console.log('Inactive users fetched:', inactiveUsers);
+      return inactiveUsers;
+    } catch (error) {
+      console.error('Error fetching inactive users:', error);
+      throw new ForbiddenException('Failed to fetch inactive users');
+    }
   }
 }
