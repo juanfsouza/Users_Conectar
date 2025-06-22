@@ -16,10 +16,22 @@ export class UpdateUserUseCase {
       throw new NotFoundException('User not found');
     }
 
+    console.log('UpdateUserUseCase - Input user data:', user);
+
     if (user.password) {
       user.password = await bcrypt.hash(user.password, 10);
     }
 
-    return this.userRepository.update(id, user);
+    if (user.role) {
+      existingUser.role = user.role;
+    }
+
+    Object.assign(existingUser, user);
+
+    console.log('User before save:', existingUser);
+    const updatedUser = await this.userRepository.update(id, existingUser);
+    console.log('User after save:', updatedUser);
+
+    return updatedUser;
   }
 }

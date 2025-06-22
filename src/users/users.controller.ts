@@ -45,7 +45,9 @@ export class UsersController {
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'User not found' })
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Request() req): Promise<User> {
-    return this.usersService.update(id, updateUserDto, req.user);
+    const updatedUser = await this.usersService.update(id, updateUserDto, req.user);
+    console.log('UsersController - Updated user response:', updatedUser); // Log da resposta
+    return updatedUser;
   }
 
   @Delete(':id')

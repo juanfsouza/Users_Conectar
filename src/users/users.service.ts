@@ -49,6 +49,7 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto, currentUser: User): Promise<User> {
+    console.log('UsersService - Update DTO:', updateUserDto);
     if (currentUser.role !== 'admin' && currentUser.id !== id) {
       throw new ForbiddenException('Users can only update their own profile');
     }
@@ -56,6 +57,7 @@ export class UsersService {
       throw new ForbiddenException('Only admins can update user roles');
     }
     const user = plainToClass(User, updateUserDto, { excludeExtraneousValues: true }) as Partial<User>;
+    console.log('UsersService - Transformed user:', user);
     const existingUser = await this.findById(id, currentUser);
     return this.updateUserUseCase.execute(id, user);
   }
