@@ -5,6 +5,7 @@ import { User } from '../domain/entities/user.entity';
 import { CreateUserUseCase } from '../application/use-cases/create-user.use-case';
 import { UpdateUserUseCase } from '../application/use-cases/update-user.use-case';
 import { DeleteUserUseCase } from '../application/use-cases/delete-user.use-case';
+import { GetInactiveUsersUseCase } from '../application/use-cases/get-inactive-users.use-case';
 import { plainToClass } from 'class-transformer';
 import { CreateUserDto } from '../infrastructure/http/dto/create-user.dto';
 import { UpdateUserDto } from '../infrastructure/http/dto/update-user.dto';
@@ -17,6 +18,7 @@ export class UsersService {
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly updateUserUseCase: UpdateUserUseCase,
     private readonly deleteUserUseCase: DeleteUserUseCase,
+    private readonly getInactiveUsersUseCase: GetInactiveUsersUseCase,
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {}
@@ -88,20 +90,6 @@ export class UsersService {
     if (!currentUser || currentUser.role !== 'admin') {
       throw new ForbiddenException('Only admins can view inactive users');
     }
-    const dateThreshold = new Date();
-    dateThreshold.setDate(dateThreshold.getDate() - 30);
-    try {
-      const allUsers = await this.userRepository.createQueryBuilder('user').getMany();
-      console.log('All users fetched for debug:', allUsers);
-      const inactiveUsers = await this.userRepository
-        .createQueryBuilder('user')
-        .where('user.lastLogin IS NULL OR user.lastLogin < :date', { date: dateThreshold })
-        .getMany();
-      console.log('Inactive users fetched:', inactiveUsers);
-      return inactiveUsers;
-    } catch (error) {
-      console.error('Error fetching inactive users:', error);
-      throw new ForbiddenException('Failed to fetch inactive users');
-    }
+    return this.getInactiveUsersUseCase.execute(30);
   }
 }

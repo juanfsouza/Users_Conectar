@@ -44,10 +44,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     try {
-      await this.usersRepository.update(id, { lastLogin: new Date(), updatedAt: new Date() });
-      console.log('Updated lastLogin for user:', id);
+      const result = await this.usersRepository.update(id, { lastLogin: new Date(), updatedAt: new Date() });
+      if (result.affected === 0) {
+        console.warn('No rows updated for user:', id, 'Possible user not found or no changes');
+      } else {
+        console.log('Successfully updated lastLogin for user:', id);
+      }
+      const updatedUser = await this.usersRepository.findOne({ where: { id } });
+      console.log('Updated user data:', updatedUser);
     } catch (error) {
-      console.error('Failed to update lastLogin:', error);
+      console.error('Failed to update lastLogin for user:', id, 'Error:', error);
     }
 
     return { id, email, role };

@@ -7,6 +7,9 @@ import { DeleteUserUseCase } from '../application/use-cases/delete-user.use-case
 import { TypeOrmUserRepository } from '../infrastructure/persistence/typeorm-user.repository';
 import { User } from '../domain/entities/user.entity';
 import { UsersController } from './users.controller';
+import { FindUserUseCase } from '../application/use-cases/find-user.use-case';
+import { GetInactiveUsersUseCase } from '../application/use-cases/get-inactive-users.use-case';
+import { ListUsersUseCase } from '../application/use-cases/list-users.use-case';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
@@ -20,6 +23,9 @@ import { UsersController } from './users.controller';
     CreateUserUseCase,
     UpdateUserUseCase,
     DeleteUserUseCase,
+    FindUserUseCase,
+    GetInactiveUsersUseCase,
+    ListUsersUseCase,
   ],
   exports: [UsersService],
 })
