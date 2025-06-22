@@ -19,9 +19,13 @@ Uma ferramenta interna para gerenciar usuários da Conéctar, com foco em segura
 - Frontend: `npm run dev`
 
 ## Estrutura do Projeto
+- `src/auth`: Endpoits auth e google.
+- `src/users`: Crud users.
 - `src/domain`: Entidades e interfaces.
 - `src/application`: Casos de uso (use cases).
 - `src/infrastructure`: Implementações (controladores, repositórios).
+- `src/seed`: Criação de conta para admin.
+- `test`: Testes.
 
 ## Funcionalidades
 - CRUD de usuários com permissões (admin/user).
@@ -36,7 +40,8 @@ Execute `npm run test` para rodar os testes unitários.
 - Uso de JWT com cookies HTTP-only para segurança.
 - TypeORM para persistência escalável.
 
-## Contribuição
-1. Fork o repositório.
-2. Crie uma branch: `git checkout -b feature/nova-funcionalidade`
-3. Envie um PR.
+## Decisões de Design
+
+- JWT armazenado em cookies HTTP-only para segurança contra XSS e CSRF
+- Banco de dados PostgreSQL com TypeORM e suporte a migrações
+- Arquitetura limpa separando domínio, aplicação e infraestrutura
