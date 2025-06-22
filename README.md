@@ -53,3 +53,6 @@ Execute `npm run test` para rodar os testes unitários.
 - Backend Render: https://users-conectar.onrender.com
 
 obs: provavelmente backend não vai ta funcionando por causa das regras do render, mas se for testar me manda uma mensagem no whatsapp que eu faço restart, mas na video.
+
+![ezgif-860a11f584795e](https://github.com/user-attachments/assets/18f1a976-b2ce-4db6-b1f3-517b47c7260e)
+
