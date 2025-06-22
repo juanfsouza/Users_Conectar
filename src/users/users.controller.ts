@@ -1,3 +1,4 @@
+// src/users/users.controller.ts
 import { Controller, Get, Post, Patch, Delete, Body, Query, Param, UseGuards, HttpCode, HttpStatus, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -65,14 +66,5 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'User not found' })
   async delete(@Param('id') id: string, @Request() req): Promise<void> {
     return this.usersService.delete(id, req.user);
-  }
-
-  @Post('update-last-login')
-  @ApiOperation({ summary: 'Force update lastLogin for the current user' })
-  @ApiResponse({ status: 200, description: 'lastLogin updated' })
-  async updateLastLogin(@Request() req): Promise<{ message: string; user: User }> {
-    const userId = req.user.id;
-    const updatedUser = await this.usersService.update(userId, { lastLogin: new Date() } as any, req.user);
-    return { message: 'lastLogin updated successfully', user: updatedUser };
   }
 }

@@ -1,10 +1,8 @@
-// src/app.module.ts
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { UpdateLastLoginMiddleware } from './middlewares/update-last-login.middleware';
 import { User } from './domain/entities/user.entity';
 
 @Module({
@@ -30,10 +28,6 @@ import { User } from './domain/entities/user.entity';
     AuthModule,
     UsersModule,
   ],
-  providers: [UpdateLastLoginMiddleware],
+  providers: [],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(UpdateLastLoginMiddleware).forRoutes('*');
-  }
-}
+export class AppModule {} 
