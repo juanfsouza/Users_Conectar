@@ -32,6 +32,7 @@ Uma ferramenta interna para gerenciar usuários da Conéctar, com foco em segura
 - Notificações de usuários inativos.
 - Logout funcional.
 - Login Google
+- Swagger para documentação
 
 ## Testes
 Execute `npm run test` para rodar os testes unitários.
@@ -56,4 +57,8 @@ obs: provavelmente backend não vai ta funcionando por causa das regras do rende
 ![ezgif-860a11f584795e](https://github.com/user-attachments/assets/18f1a976-b2ce-4db6-b1f3-517b47c7260e)
 
 ![Screenshot_8](https://github.com/user-attachments/assets/04b40257-6d98-4627-97bc-3ca66e20701a)
+
+![Screenshot_2](https://github.com/user-attachments/assets/9554a8e8-7c16-401b-bae1-9949058ca6f5)
+
+![Screenshot_3](https://github.com/user-attachments/assets/79f81553-df19-4024-916d-92acd42f1fb7)
 
