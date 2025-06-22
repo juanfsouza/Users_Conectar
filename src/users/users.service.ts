@@ -5,7 +5,6 @@ import { User } from '../domain/entities/user.entity';
 import { CreateUserUseCase } from '../application/use-cases/create-user.use-case';
 import { UpdateUserUseCase } from '../application/use-cases/update-user.use-case';
 import { DeleteUserUseCase } from '../application/use-cases/delete-user.use-case';
-import { FindUserUseCase } from '../application/use-cases/find-user.use-case';
 import { plainToClass } from 'class-transformer';
 import { CreateUserDto } from '../infrastructure/http/dto/create-user.dto';
 import { UpdateUserDto } from '../infrastructure/http/dto/update-user.dto';
@@ -18,7 +17,6 @@ export class UsersService {
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly updateUserUseCase: UpdateUserUseCase,
     private readonly deleteUserUseCase: DeleteUserUseCase,
-    private readonly findUserUseCase: FindUserUseCase,
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {}
@@ -48,18 +46,17 @@ export class UsersService {
     if (!uuidValidate(id)) {
       throw new NotFoundException('Invalid user ID');
     }
-    if (currentUser.role !== 'admin' && currentUser.id !== id) {
-      throw new ForbiddenException('Users can only view their own profile');
-    }
-    const user = await this.findUserUseCase.execute(id);
+    const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+    if (currentUser.role !== 'admin' && currentUser.id !== id) {
+      throw new ForbiddenException('Users can only view their own profile');
     }
     return user;
   }
 
   async update(id: string, updateUserDto: UpdateUserDto, currentUser: User): Promise<User> {
-    console.log('UsersService - Update DTO:', updateUserDto);
     if (!uuidValidate(id)) {
       throw new NotFoundException('Invalid user ID');
     }
@@ -70,23 +67,23 @@ export class UsersService {
       throw new ForbiddenException('Only admins can update user roles');
     }
     const user = plainToClass(User, updateUserDto, { excludeExtraneousValues: true }) as Partial<User>;
-    console.log('UsersService - Transformed user:', user);
     const existingUser = await this.findById(id, currentUser);
-    return this.updateUserUseCase.execute(id, user);
+    await this.userRepository.update(id, user);
+    return this.userRepository.findOneOrFail({ where: { id } });
   }
 
   async delete(id: string, currentUser: User): Promise<void> {
     if (currentUser.role !== 'admin') {
       throw new ForbiddenException('Only admins can delete users');
     }
-    return this.deleteUserUseCase.execute(id);
+    await this.userRepository.delete(id);
   }
 
-  async findInactiveUsers(currentUser: User): Promise<User[]> {
-    if (currentUser.role !== 'admin') {
+  async findInactiveUsers(currentUser: any): Promise<User[]> { 
+    if (currentUser?.role !== 'admin') {
       throw new ForbiddenException('Only admins can view inactive users');
     }
-    console.log('Fetching inactive users for user:', currentUser.email);
+    console.log('Fetching inactive users for user:', currentUser?.email || 'unknown');
     const dateThreshold = new Date();
     dateThreshold.setDate(dateThreshold.getDate() - 30);
     const inactiveUsers = await this.userRepository
