@@ -1,14 +1,14 @@
 import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from '../domain/entities/user.entity';
 import { CreateUserUseCase } from '../application/use-cases/create-user.use-case';
-import { ListUsersUseCase } from '../application/use-cases/list-users.use-case';
 import { UpdateUserUseCase } from '../application/use-cases/update-user.use-case';
 import { DeleteUserUseCase } from '../application/use-cases/delete-user.use-case';
-import { GetInactiveUsersUseCase } from '../application/use-cases/get-inactive-users.use-case';
-import { User } from '../domain/entities/user.entity';
+import { FindUserUseCase } from '../application/use-cases/find-user.use-case';
 import { plainToClass } from 'class-transformer';
 import { CreateUserDto } from '../infrastructure/http/dto/create-user.dto';
 import { UpdateUserDto } from '../infrastructure/http/dto/update-user.dto';
-import { FindUserUseCase } from '../application/use-cases/find-user.use-case';
 import { ListUsersFilterDto } from '../infrastructure/http/dto/list-users.dto';
 import { validate as uuidValidate } from 'uuid';
 
@@ -16,11 +16,11 @@ import { validate as uuidValidate } from 'uuid';
 export class UsersService {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
-    private readonly listUsersUseCase: ListUsersUseCase,
     private readonly updateUserUseCase: UpdateUserUseCase,
     private readonly deleteUserUseCase: DeleteUserUseCase,
-    private readonly getInactiveUsersUseCase: GetInactiveUsersUseCase,
     private readonly findUserUseCase: FindUserUseCase,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   async create(createUserDto: CreateUserDto, currentUser: User): Promise<User> {
@@ -35,7 +35,13 @@ export class UsersService {
     if (currentUser.role !== 'admin') {
       throw new ForbiddenException('Only admins can list all users');
     }
-    return this.listUsersUseCase.execute(filters);
+    const query = this.userRepository.createQueryBuilder('user');
+    if (filters.role) query.andWhere('user.role = :role', { role: filters.role });
+    if (filters.sortBy) query.orderBy(`user.${filters.sortBy}`, filters.order?.toUpperCase() as 'ASC' | 'DESC' || 'ASC');
+    const page = filters.page ?? 1;
+    query.skip((page - 1) * (filters.limit || 10)).take(filters.limit || 10);
+    const [users, total] = await query.getManyAndCount();
+    return { users, total };
   }
 
   async findById(id: string, currentUser: User): Promise<User> {
@@ -83,8 +89,10 @@ export class UsersService {
     console.log('Fetching inactive users for user:', currentUser.email);
     const dateThreshold = new Date();
     dateThreshold.setDate(dateThreshold.getDate() - 30);
-    const allUsers = await this.listUsersUseCase.execute({ limit: 100 }); // Usa listUsersUseCase
-    const inactiveUsers = allUsers.users.filter(user => !user.lastLogin || new Date(user.lastLogin) < dateThreshold);
+    const inactiveUsers = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.lastLogin IS NULL OR user.lastLogin < :date', { date: dateThreshold })
+      .getMany();
     console.log('Inactive users fetched:', inactiveUsers);
     return inactiveUsers;
   }
