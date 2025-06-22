@@ -80,10 +80,13 @@ export class UsersService {
     if (currentUser.role !== 'admin') {
       throw new ForbiddenException('Only admins can view inactive users');
     }
+    console.log('Fetching inactive users for user:', currentUser.email);
     try {
-      return await this.getInactiveUsersUseCase.execute(30);
+      const inactiveUsers = await this.getInactiveUsersUseCase.execute(30);
+      console.log('Inactive users fetched:', inactiveUsers);
+      return inactiveUsers;
     } catch (error) {
-      console.error('Error fetching inactive users:', error);
+      console.error('Error in findInactiveUsers:', error);
       return [];
     }
   }

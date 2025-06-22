@@ -54,11 +54,14 @@ export class TypeOrmUserRepository implements IUserRepository {
   async findInactiveUsers(days: number): Promise<User[]> {
     const date = new Date();
     date.setDate(date.getDate() - days);
-    return this.userRepository.find({
+    console.log('Inactive users:', date);
+    const inactiveUsers = await this.userRepository.find({
       where: [
         { lastLogin: LessThan(date) },
         { lastLogin: IsNull() },
       ],
     });
+    console.log('Inactive users result:', inactiveUsers);
+    return inactiveUsers;
   }
 }

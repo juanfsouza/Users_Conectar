@@ -46,7 +46,7 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'User not found' })
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Request() req): Promise<User> {
     const updatedUser = await this.usersService.update(id, updateUserDto, req.user);
-    console.log('UsersController - Updated user response:', updatedUser); // Log da resposta
+    console.log('UsersController - Updated user response:', updatedUser);
     return updatedUser;
   }
 
@@ -60,12 +60,11 @@ export class UsersController {
     return this.usersService.delete(id, req.user);
   }
 
-  @Get('inactive')
-  @ApiOperation({ summary: 'List inactive users (admin only)' })
-  @ApiResponse({ status: 200, description: 'List of inactive users' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  async findInactiveUsers(@Request() req): Promise<User[]> {
-    console.log('Request user:', req.user);
-    return this.usersService.findInactiveUsers(req.user);
+  @Get('test-inactive')
+  @ApiOperation({ summary: 'Test inactive users endpoint' })
+  @ApiResponse({ status: 200, description: 'Test successful' })
+  async testInactive(@Request() req): Promise<string> {
+    console.log('Test endpoint called with user:', req.user);
+    return 'Inactive endpoint test successful';
   }
 }
