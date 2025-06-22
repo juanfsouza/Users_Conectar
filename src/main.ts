@@ -1,11 +1,10 @@
-// src/main.ts
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
-import { UpdateLastLoginMiddleware } from 'middlewares/update-last-login.middleware';
+import { UpdateLastLoginMiddleware } from './middlewares/update-last-login.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -29,7 +28,6 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Registrar o middleware usando o sistema de injeção
   app.use((req, res, next) => {
     const middleware = app.get(UpdateLastLoginMiddleware);
     middleware.use(req, res, next);

@@ -1,10 +1,10 @@
-// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { UpdateLastLoginMiddleware } from './middlewares/update-last-login.middleware';
+import { User } from './domain/entities/user.entity';
 
 @Module({
   imports: [
@@ -25,6 +25,7 @@ import { UpdateLastLoginMiddleware } from './middlewares/update-last-login.middl
       }),
       inject: [ConfigService],
     }),
+    TypeOrmModule.forFeature([User]),
     AuthModule,
     UsersModule,
   ],
