@@ -10,6 +10,7 @@ import { CreateUserDto } from '../infrastructure/http/dto/create-user.dto';
 import { UpdateUserDto } from '../infrastructure/http/dto/update-user.dto';
 import { FindUserUseCase } from '../application/use-cases/find-user.use-case';
 import { ListUsersFilterDto } from '../infrastructure/http/dto/list-users.dto';
+import { validate as uuidValidate } from 'uuid';
 
 @Injectable()
 export class UsersService {
@@ -38,6 +39,9 @@ export class UsersService {
   }
 
   async findById(id: string, currentUser: User): Promise<User> {
+    if (!uuidValidate(id)) {
+      throw new NotFoundException('Invalid user ID');
+    }
     if (currentUser.role !== 'admin' && currentUser.id !== id) {
       throw new ForbiddenException('Users can only view their own profile');
     }
@@ -50,6 +54,9 @@ export class UsersService {
 
   async update(id: string, updateUserDto: UpdateUserDto, currentUser: User): Promise<User> {
     console.log('UsersService - Update DTO:', updateUserDto);
+    if (!uuidValidate(id)) {
+      throw new NotFoundException('Invalid user ID');
+    }
     if (currentUser.role !== 'admin' && currentUser.id !== id) {
       throw new ForbiddenException('Users can only update their own profile');
     }

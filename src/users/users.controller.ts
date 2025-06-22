@@ -65,6 +65,7 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'List of inactive users' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   async findInactiveUsers(@Request() req): Promise<User[]> {
+    console.log('Request user:', req.user);
     return this.usersService.findInactiveUsers(req.user);
   }
 }
