@@ -8,7 +8,7 @@ import { Response, Request } from 'express';
 import { User } from '../domain/entities/user.entity';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt';
-import { CreateAdminDto } from './dto/create-admin.dto'; // New DTO
+import { CreateAdminDto } from './dto/create-admin.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -57,8 +57,15 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(200)
-  logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('accessToken');
+  @UseGuards(JwtAuthGuard)
+  logout(@Res({ passthrough: true }) res: Response, @Req() req: Request & { user: User }) {
+    console.log("Attempting to clear accessToken cookie for user:", req.user.email);
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
+    console.log("accessToken cookie cleared.");
     return { message: 'Logout successful' };
   }
 
