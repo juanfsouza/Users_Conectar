@@ -10,13 +10,12 @@ Uma ferramenta interna para gerenciar usuários da Conéctar, com foco em segura
 
 ## Instalação
 1. Clone o repositório: `git clone https://github.com/juanfsouza/Users_Conectar`
-2. Instale as dependências: `cd backend && npm install` e `cd frontend && npm install`
+2. Instale as dependências: `cd backend && npm install`
 3. Configure o `.env` com as variáveis necessárias.
 4. Crie o banco de dados e migre o schema (ex.: `npx typeorm migration:run`).
 
 ## Execução
 - Backend: `npm run start:dev`
-- Frontend: `npm run dev`
 
 ## Estrutura do Projeto
 - `src/auth`: Endpoits auth e google.
