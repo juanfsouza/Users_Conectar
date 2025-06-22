@@ -61,7 +61,7 @@ export class TypeOrmUserRepository implements IUserRepository {
         { lastLogin: IsNull() },
       ],
     });
-    console.log('Inactive users result:', inactiveUsers);
+    console.log('Inactive users result (count:', inactiveUsers.length, '):', inactiveUsers);
     return inactiveUsers;
   }
 }

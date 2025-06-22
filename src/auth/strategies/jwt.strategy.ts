@@ -48,7 +48,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       if (result.affected === 0) {
         console.warn('No rows updated for user:', id, 'Possible user not found or no changes');
       } else {
-        console.log('Successfully updated lastLogin for user:', id);
+        console.log('Successfully updated lastLogin for user:', id, 'Affected rows:', result.affected);
       }
       const updatedUser = await this.usersRepository.findOne({ where: { id } });
       console.log('Updated user data:', updatedUser);
