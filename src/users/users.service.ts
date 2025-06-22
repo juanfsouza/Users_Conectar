@@ -91,6 +91,8 @@ export class UsersService {
     const dateThreshold = new Date();
     dateThreshold.setDate(dateThreshold.getDate() - 30);
     try {
+      const allUsers = await this.userRepository.createQueryBuilder('user').getMany();
+      console.log('All users fetched for debug:', allUsers);
       const inactiveUsers = await this.userRepository
         .createQueryBuilder('user')
         .where('user.lastLogin IS NULL OR user.lastLogin < :date', { date: dateThreshold })
