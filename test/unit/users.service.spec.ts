@@ -12,6 +12,9 @@ import { plainToClass } from 'class-transformer';
 import { CreateUserDto } from '../../src/infrastructure/http/dto/create-user.dto';
 import { UpdateUserDto } from '../../src/infrastructure/http/dto/update-user.dto';
 import { ListUsersFilterDto } from '../../src/infrastructure/http/dto/list-users.dto';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { v4 as uuidv4 } from 'uuid'; // Adiciona suporte a UUID
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -21,6 +24,7 @@ describe('UsersService', () => {
   let deleteUserUseCase: DeleteUserUseCase;
   let getInactiveUsersUseCase: GetInactiveUsersUseCase;
   let findUserUseCase: FindUserUseCase;
+  let userRepository: Repository<User>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -65,6 +69,24 @@ describe('UsersService', () => {
             execute: jest.fn().mockImplementation((id: string) => Promise.resolve({ id } as User)),
           },
         },
+        {
+          provide: getRepositoryToken(User),
+          useValue: {
+            findOne: jest.fn(),
+            findOneOrFail: jest.fn(),
+            createQueryBuilder: jest.fn().mockReturnValue({
+              andWhere: jest.fn().mockReturnThis(),
+              orderBy: jest.fn().mockReturnThis(),
+              skip: jest.fn().mockReturnThis(),
+              take: jest.fn().mockReturnThis(),
+              getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+              update: jest.fn().mockReturnThis(),
+              delete: jest.fn().mockReturnThis(),
+            }),
+            update: jest.fn(),
+            delete: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -75,6 +97,7 @@ describe('UsersService', () => {
     deleteUserUseCase = module.get<DeleteUserUseCase>(DeleteUserUseCase);
     getInactiveUsersUseCase = module.get<GetInactiveUsersUseCase>(GetInactiveUsersUseCase);
     findUserUseCase = module.get<FindUserUseCase>(FindUserUseCase);
+    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
   });
 
   it('should be defined', () => {
@@ -84,7 +107,7 @@ describe('UsersService', () => {
   it('should create a user', async () => {
     const createUserDto: CreateUserDto = { name: 'Test User', email: 'test@example.com', password: 'password', role: 'user' };
     const user = plainToClass(User, createUserDto, { excludeExtraneousValues: true }) as User;
-    const currentUser = { role: 'admin', id: '1' } as User;
+    const currentUser = { role: 'admin', id: uuidv4() } as User;
     jest.spyOn(createUserUseCase, 'execute').mockResolvedValue(user);
 
     const result = await service.create(createUserDto, currentUser);
@@ -95,69 +118,103 @@ describe('UsersService', () => {
   it('should throw ForbiddenException for non-admin creating admin', async () => {
     const createUserDto: CreateUserDto = { name: 'Test', email: 'test@example.com', password: 'password', role: 'admin' };
     const user = plainToClass(User, createUserDto, { excludeExtraneousValues: true }) as User;
-    const currentUser = { role: 'user', id: '1' } as User;
+    const currentUser = { role: 'user', id: uuidv4() } as User;
     await expect(service.create(createUserDto, currentUser)).rejects.toThrow(ForbiddenException);
   });
 
-  it('should list users', async () => {
-    const users = [{ id: '1', name: 'Test', email: 'test@example.com', role: 'user', createdAt: new Date(), updatedAt: new Date() }] as User[];
-    const currentUser = { role: 'admin', id: '1' } as User;
-    jest.spyOn(listUsersUseCase, 'execute').mockResolvedValue({ users, total: 1 });
+  it('should list users with filters', async () => {
+    const users = [{ id: uuidv4(), name: 'Test', email: 'test@example.com', role: 'user', createdAt: new Date(), updatedAt: new Date(), lastLogin: new Date() }] as User[];
+    const currentUser = { role: 'admin', id: uuidv4() } as User;
+    const filters: ListUsersFilterDto = { lastLogin: 'last7' };
+    jest.spyOn(userRepository.createQueryBuilder(), 'getManyAndCount').mockResolvedValue([users, 1]);
 
-    const result = await service.findAll({} as ListUsersFilterDto, currentUser);
-    expect(listUsersUseCase.execute).toHaveBeenCalled();
+    const result = await service.findAll(filters, currentUser);
+    expect(userRepository.createQueryBuilder).toHaveBeenCalled();
     expect(result).toEqual({ users, total: 1 });
   });
 
   it('should throw ForbiddenException for non-admin listing users', async () => {
-    const currentUser = { role: 'user', id: '1' } as User;
+    const currentUser = { role: 'user', id: uuidv4() } as User;
     await expect(service.findAll({} as ListUsersFilterDto, currentUser)).rejects.toThrow(ForbiddenException);
   });
 
-  it('should update user', async () => {
-    const updateUserDto: UpdateUserDto = { name: 'Updated' };
-    const user = { id: '1', name: 'Updated', email: 'test@example.com', role: 'user', createdAt: new Date(), updatedAt: new Date() } as User;
-    const currentUser = { role: 'admin', id: '1' } as User;
-    jest.spyOn(findUserUseCase, 'execute').mockResolvedValue(user);
-    jest.spyOn(updateUserUseCase, 'execute').mockResolvedValue(user);
+  it('should find user by id', async () => {
+    const userId = uuidv4();
+    const user: User = { id: userId, name: 'Test', email: 'test@example.com', role: 'user', createdAt: new Date(), updatedAt: new Date() } as User;
+    const currentUser = { role: 'admin', id: uuidv4() } as User;
+    jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
 
-    const result = await service.update('1', updateUserDto, currentUser);
-    expect(updateUserUseCase.execute).toHaveBeenCalledWith('1', expect.any(Object));
+    const result = await service.findById(userId, currentUser);
+    expect(userRepository.findOne).toHaveBeenCalledWith({ where: { id: userId } });
     expect(result).toEqual(user);
   });
 
-  it('should throw ForbiddenException for non-admin updating user role', async () => {
-    const updateUserDto: UpdateUserDto = { role: 'admin' };
-    const currentUser = { role: 'user', id: '1' } as User;
-    jest.spyOn(findUserUseCase, 'execute').mockResolvedValue({ id: '1', role: 'user' } as User);
+  it('should throw NotFoundException for invalid id', async () => {
+    const currentUser = { role: 'admin', id: uuidv4() } as User;
+    jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
-    await expect(service.update('1', updateUserDto, currentUser)).rejects.toThrow(ForbiddenException);
+    await expect(service.findById('invalid-id', currentUser)).rejects.toThrow(NotFoundException);
+  });
+
+  it('should throw ForbiddenException for non-owner viewing', async () => {
+    const userId = uuidv4();
+    const user: User = { id: userId, name: 'Test', email: 'test@example.com', role: 'user', createdAt: new Date(), updatedAt: new Date() } as User;
+    const currentUser = { role: 'user', id: uuidv4() } as User; // Diferente do ID do usuário
+    jest.spyOn(userRepository, 'findOne').mockResolvedValue(user);
+
+    await expect(service.findById(userId, currentUser)).rejects.toThrow(ForbiddenException);
+  });
+
+  it('should update user', async () => {
+    const userId = uuidv4();
+    const updateUserDto: UpdateUserDto = { name: 'Updated' };
+    const user = { id: userId, name: 'Updated', email: 'test@example.com', role: 'user', createdAt: new Date(), updatedAt: new Date() } as User;
+    const currentUser = { role: 'admin', id: uuidv4() } as User;
+    jest.spyOn(userRepository, 'findOneOrFail').mockResolvedValue(user);
+    jest.spyOn(userRepository, 'update').mockResolvedValue({ affected: 1 } as any);
+    jest.spyOn(userRepository, 'findOneOrFail').mockResolvedValue(user);
+
+    const result = await service.update(userId, updateUserDto, currentUser);
+    expect(userRepository.update).toHaveBeenCalledWith(userId, expect.any(Object));
+    expect(result).toEqual(user);
+  });
+
+  it('should throw ForbiddenException for non-admin updating role', async () => {
+    const userId = uuidv4();
+    const updateUserDto: UpdateUserDto = { role: 'admin' };
+    const currentUser = { role: 'user', id: uuidv4() } as User;
+    jest.spyOn(userRepository, 'findOneOrFail').mockResolvedValue({ id: userId, role: 'user' } as User);
+
+    await expect(service.update(userId, updateUserDto, currentUser)).rejects.toThrow(ForbiddenException);
   });
 
   it('should throw NotFoundException for non-existent user update', async () => {
+    const userId = uuidv4();
     const updateUserDto: UpdateUserDto = { name: 'Updated' };
-    const currentUser = { role: 'admin', id: '1' } as User;
-    jest.spyOn(findUserUseCase, 'execute').mockResolvedValue(Promise.resolve(null as unknown as User));
+    const currentUser = { role: 'admin', id: uuidv4() } as User;
+    jest.spyOn(userRepository, 'findOneOrFail').mockRejectedValue(new NotFoundException());
 
-    await expect(service.update('1', updateUserDto, currentUser)).rejects.toThrow(NotFoundException);
+    await expect(service.update(userId, updateUserDto, currentUser)).rejects.toThrow(NotFoundException);
   });
 
   it('should delete user', async () => {
-    const currentUser = { role: 'admin', id: '1' } as User;
-    jest.spyOn(deleteUserUseCase, 'execute').mockResolvedValue();
+    const userId = uuidv4();
+    const currentUser = { role: 'admin', id: uuidv4() } as User;
+    jest.spyOn(userRepository, 'delete').mockResolvedValue({ affected: 1 } as any);
 
-    await service.delete('1', currentUser);
-    expect(deleteUserUseCase.execute).toHaveBeenCalledWith('1');
+    await service.delete(userId, currentUser);
+    expect(userRepository.delete).toHaveBeenCalledWith(userId);
   });
 
   it('should throw ForbiddenException for non-admin deleting user', async () => {
-    const currentUser = { role: 'user', id: '1' } as User;
-    await expect(service.delete('1', currentUser)).rejects.toThrow(ForbiddenException);
+    const userId = uuidv4();
+    const currentUser = { role: 'user', id: uuidv4() } as User;
+    await expect(service.delete(userId, currentUser)).rejects.toThrow(ForbiddenException);
   });
 
   it('should list inactive users', async () => {
-    const users = [{ id: '1', name: 'Inactive', email: 'inactive@example.com', role: 'user', createdAt: new Date(), updatedAt: new Date() }] as User[];
-    const currentUser = { role: 'admin', id: '1' } as User;
+    const users = [{ id: uuidv4(), name: 'Inactive', email: 'inactive@example.com', role: 'user', createdAt: new Date(), updatedAt: new Date() }] as User[];
+    const currentUser = { role: 'admin', id: uuidv4() } as User;
     jest.spyOn(getInactiveUsersUseCase, 'execute').mockResolvedValue(users);
 
     const result = await service.findInactiveUsers(currentUser);
@@ -166,7 +223,7 @@ describe('UsersService', () => {
   });
 
   it('should throw ForbiddenException for non-admin listing inactive users', async () => {
-    const currentUser = { role: 'user', id: '1' } as User;
+    const currentUser = { role: 'user', id: uuidv4() } as User;
     await expect(service.findInactiveUsers(currentUser)).rejects.toThrow(ForbiddenException);
   });
 });

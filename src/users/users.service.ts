@@ -33,7 +33,7 @@ export class UsersService {
   }
 
   async findAll(filters: ListUsersFilterDto, currentUser: { id: string; role: string; email: string }): Promise<{ users: User[]; total: number }> {
-    console.log('Finding all users with currentUser:', currentUser);
+    console.log('Finding all users with filters:', filters, 'currentUser:', currentUser);
     if (currentUser.role !== 'admin') {
       throw new ForbiddenException('Only admins can list all users');
     }
