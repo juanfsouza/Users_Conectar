@@ -9,7 +9,7 @@ Uma ferramenta interna para gerenciar usuários da Conéctar, com foco em segura
 - Variáveis de ambiente em `.env`
 
 ## Instalação
-1. Clone o repositório: `git clone <url>`
+1. Clone o repositório: `git clone https://github.com/juanfsouza/Users_Conectar`
 2. Instale as dependências: `cd backend && npm install` e `cd frontend && npm install`
 3. Configure o `.env` com as variáveis necessárias.
 4. Crie o banco de dados e migre o schema (ex.: `npx typeorm migration:run`).
@@ -46,3 +46,10 @@ Execute `npm run test` para rodar os testes unitários.
 - JWT armazenado em cookies HTTP-only para segurança contra XSS e CSRF
 - Banco de dados PostgreSQL com TypeORM e suporte a migrações
 - Arquitetura limpa separando domínio, aplicação e infraestrutura
+
+## Deploy
+
+- Frontend Vercel: https://users-manager-frontend.vercel.app/
+- Backend Render: https://users-conectar.onrender.com
+
+obs: provavelmente backend não vai ta funcionando por causa das regras do render, mas se for testar me manda uma mensagem no whatsapp que eu faço restart, mas na video.
