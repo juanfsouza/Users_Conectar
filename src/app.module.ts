@@ -1,4 +1,5 @@
-import { Module } from '@nestjs/common';
+// src/app.module.ts
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
@@ -31,4 +32,8 @@ import { User } from './domain/entities/user.entity';
   ],
   providers: [UpdateLastLoginMiddleware],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(UpdateLastLoginMiddleware).forRoutes('*');
+  }
+}
