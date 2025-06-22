@@ -6,7 +6,6 @@ import { UpdateUserUseCase } from '../application/use-cases/update-user.use-case
 import { DeleteUserUseCase } from '../application/use-cases/delete-user.use-case';
 import { TypeOrmUserRepository } from '../infrastructure/persistence/typeorm-user.repository';
 import { User } from '../domain/entities/user.entity';
-import { FindUserUseCase } from '../application/use-cases/find-user.use-case';
 import { UsersController } from './users.controller';
 
 @Module({
@@ -21,7 +20,6 @@ import { UsersController } from './users.controller';
     CreateUserUseCase,
     UpdateUserUseCase,
     DeleteUserUseCase,
-    FindUserUseCase,
   ],
   exports: [UsersService],
 })
