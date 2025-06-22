@@ -32,6 +32,7 @@ Uma ferramenta interna para gerenciar usuários da Conéctar, com foco em segura
 - Filtros e ordenação.
 - Notificações de usuários inativos.
 - Logout funcional.
+- Login Google
 
 ## Testes
 Execute `npm run test` para rodar os testes unitários.

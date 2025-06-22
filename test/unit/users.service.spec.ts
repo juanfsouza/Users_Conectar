@@ -14,7 +14,7 @@ import { UpdateUserDto } from '../../src/infrastructure/http/dto/update-user.dto
 import { ListUsersFilterDto } from '../../src/infrastructure/http/dto/list-users.dto';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { v4 as uuidv4 } from 'uuid'; // Adiciona suporte a UUID
+import { v4 as uuidv4 } from 'uuid';
 
 describe('UsersService', () => {
   let service: UsersService;
