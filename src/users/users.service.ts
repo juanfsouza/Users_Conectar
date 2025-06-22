@@ -102,4 +102,9 @@ export class UsersService {
       throw new ForbiddenException('Failed to fetch inactive users');
     }
   }
+
+  async updateLastLogin(userId: string): Promise<void> {
+    console.log('Updating lastLogin for userId:', userId);
+    await this.userRepository.update(userId, { lastLogin: new Date(), updatedAt: new Date() });
+  }
 }
