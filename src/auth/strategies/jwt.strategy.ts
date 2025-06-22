@@ -3,10 +3,17 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { validate as uuidValidate } from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from '../../domain/entities/user.entity';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([(req) => {
         console.log('Extracting token from request:', req?.cookies);
@@ -34,6 +41,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!email || !role) {
       console.error('Missing required fields in payload:', payload);
       throw new UnauthorizedException('Invalid token payload');
+    }
+
+    try {
+      await this.usersRepository.update(id, { lastLogin: new Date(), updatedAt: new Date() });
+      console.log('Updated lastLogin for user:', id);
+    } catch (error) {
+      console.error('Failed to update lastLogin:', error);
     }
 
     return { id, email, role };
