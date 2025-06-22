@@ -80,14 +80,9 @@ export class UsersService {
     if (currentUser.role !== 'admin') {
       throw new ForbiddenException('Only admins can view inactive users');
     }
-    console.log('Fetching inactive users for user:', currentUser.email);
-    try {
-      const inactiveUsers = await this.getInactiveUsersUseCase.execute(30);
-      console.log('Inactive users fetched:', inactiveUsers);
-      return inactiveUsers;
-    } catch (error) {
-      console.error('Error in findInactiveUsers:', error);
-      return [];
-    }
+    const dateThreshold = new Date();
+    dateThreshold.setDate(dateThreshold.getDate() - 30);
+    const users = await this.listUsersUseCase.execute({ limit: 100 });
+    return users.users.filter(user => !user.lastLogin || new Date(user.lastLogin) < dateThreshold);
   }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Query, Param, UseGuards, HttpCode, HttpStatus, Request } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Query, Param, UseGuards, HttpCode, HttpStatus, Request, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { User } from '../domain/entities/user.entity';
@@ -60,11 +60,17 @@ export class UsersController {
     return this.usersService.delete(id, req.user);
   }
 
-  @Get('test-inactive')
-  @ApiOperation({ summary: 'Test inactive users endpoint' })
-  @ApiResponse({ status: 200, description: 'Test successful' })
-  async testInactive(@Request() req): Promise<string> {
-    console.log('Test endpoint called with user:', req.user);
-    return 'Inactive endpoint test successful';
+  @Get('inactive')
+  @ApiOperation({ summary: 'List inactive users (admin only)' })
+  @ApiResponse({ status: 200, description: 'List of inactive users' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  async findInactiveUsers(@Request() req): Promise<User[]> {
+    console.log('Request user:', req.user);
+    if (req.user.role !== 'admin') {
+      throw new ForbiddenException('Only admins can view inactive users');
+    }
+    // Lógica simplificada para teste
+    const inactiveUsers = await this.usersService.findAll({ limit: 100 }, req.user); // Busca todos os usuários
+    return inactiveUsers.users.filter(user => !user.lastLogin || new Date(user.lastLogin) < new Date(Date.now() - 30 * 24 * 60 * 60 * 1000));
   }
 }
