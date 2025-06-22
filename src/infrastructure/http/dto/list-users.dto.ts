@@ -1,3 +1,4 @@
+// src/infrastructure/http/dto/list-users.dto.ts
 import { IsString, IsEnum, IsInt, Min, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -7,10 +8,10 @@ export class ListUsersFilterDto {
   @ApiProperty({ description: 'Filter by user role', enum: ['admin', 'user'], required: false })
   role?: string;
 
-  @IsString()
+  @IsEnum(['name', 'createdAt', 'lastLogin'])
   @IsOptional()
-  @ApiProperty({ description: 'Sort by field (name or createdAt)', required: false })
-  sortBy?: string;
+  @ApiProperty({ description: 'Sort by field (name, createdAt, or lastLogin)', enum: ['name', 'createdAt', 'lastLogin'], required: false })
+  sortBy?: 'name' | 'createdAt' | 'lastLogin';
 
   @IsEnum(['asc', 'desc'])
   @IsOptional()
@@ -28,4 +29,14 @@ export class ListUsersFilterDto {
   @IsOptional()
   @ApiProperty({ description: 'Number of items per page', required: false })
   limit?: number;
+
+  @IsEnum(['never', 'last7', 'over30'])
+  @IsOptional()
+  @ApiProperty({ 
+    description: 'Filter by last login status', 
+    enum: ['never', 'last7', 'over30'], 
+    required: false,
+    'x-enumNames': ['Never logged in', 'Logged in last 7 days', 'Inactive for over 30 days']
+  })
+  lastLogin?: 'never' | 'last7' | 'over30';
 }

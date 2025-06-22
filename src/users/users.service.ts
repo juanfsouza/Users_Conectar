@@ -39,6 +39,18 @@ export class UsersService {
     }
     const query = this.userRepository.createQueryBuilder('user');
     if (filters.role) query.andWhere('user.role = :role', { role: filters.role });
+    if (filters.lastLogin) {
+      const now = new Date();
+      if (filters.lastLogin === 'never') {
+        query.andWhere('user.lastLogin IS NULL');
+      } else if (filters.lastLogin === 'last7') {
+        const threshold = new Date(now.setDate(now.getDate() - 7));
+        query.andWhere('user.lastLogin >= :threshold', { threshold });
+      } else if (filters.lastLogin === 'over30') {
+        const threshold = new Date(now.setDate(now.getDate() - 30));
+        query.andWhere('user.lastLogin < :threshold OR user.lastLogin IS NULL', { threshold });
+      }
+    }
     if (filters.sortBy) query.orderBy(`user.${filters.sortBy}`, filters.order?.toUpperCase() as 'ASC' | 'DESC' || 'ASC');
     const page = filters.page ?? 1;
     query.skip((page - 1) * (filters.limit || 10)).take(filters.limit || 10);
