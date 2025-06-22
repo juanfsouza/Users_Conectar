@@ -56,3 +56,5 @@ obs: provavelmente backend não vai ta funcionando por causa das regras do rende
 
 ![ezgif-860a11f584795e](https://github.com/user-attachments/assets/18f1a976-b2ce-4db6-b1f3-517b47c7260e)
 
+![Screenshot_8](https://github.com/user-attachments/assets/04b40257-6d98-4627-97bc-3ca66e20701a)
+
