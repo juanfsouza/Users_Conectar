@@ -7,7 +7,6 @@ import { DeleteUserUseCase } from '../application/use-cases/delete-user.use-case
 import { TypeOrmUserRepository } from '../infrastructure/persistence/typeorm-user.repository';
 import { User } from '../domain/entities/user.entity';
 import { UsersController } from './users.controller';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
@@ -21,7 +20,6 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
     CreateUserUseCase,
     UpdateUserUseCase,
     DeleteUserUseCase,
-    JwtAuthGuard,
   ],
   exports: [UsersService],
 })
