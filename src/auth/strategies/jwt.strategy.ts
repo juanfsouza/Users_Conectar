@@ -16,12 +16,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([(req) => {
-        console.log('Extracting token from request:', req?.cookies);
+        console.log('Attempting to extract token from request:', req?.headers, req?.cookies);
         let token = null;
         if (req && req.cookies) {
           token = req.cookies['accessToken'];
-          console.log('Extracted token:', token);
+          console.log('Extracted token from cookies:', token);
+        } else if (req && req.headers.authorization) {
+          const authHeader = req.headers.authorization;
+          token = authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+          console.log('Extracted token from authorization header:', token);
         }
+        console.log('Final extracted token:', token);
         return token;
       }]),
       ignoreExpiration: false,
@@ -43,6 +48,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Invalid token payload');
     }
 
+    // Atualizar lastLogin com tratamento de erros detalhado
     try {
       const result = await this.usersRepository.update(id, { lastLogin: new Date(), updatedAt: new Date() });
       if (result.affected === 0) {

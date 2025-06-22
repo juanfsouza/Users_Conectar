@@ -66,4 +66,13 @@ export class UsersController {
   async delete(@Param('id') id: string, @Request() req): Promise<void> {
     return this.usersService.delete(id, req.user);
   }
+
+  @Post('update-last-login')
+  @ApiOperation({ summary: 'Force update lastLogin for the current user' })
+  @ApiResponse({ status: 200, description: 'lastLogin updated' })
+  async updateLastLogin(@Request() req): Promise<{ message: string; user: User }> {
+    const userId = req.user.id;
+    const updatedUser = await this.usersService.update(userId, { lastLogin: new Date() } as any, req.user);
+    return { message: 'lastLogin updated successfully', user: updatedUser };
+  }
 }
