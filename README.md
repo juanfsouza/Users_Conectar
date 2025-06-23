@@ -34,7 +34,7 @@ Uma ferramenta interna para gerenciar usuários da Conéctar, com foco em segura
 - Login Google
 - Swagger para documentação
 
-## Endpoints Exemplo:
+## Alguns Endpoints de Exemplo:
 
 ### Cadastro de Usuários (User)
 - **Endpoint:** `POST https://users-conectar.onrender.com/api/auth/register`
@@ -91,7 +91,29 @@ Uma ferramenta interna para gerenciar usuários da Conéctar, com foco em segura
     ```
 ### Um Usuários (User & Admin)
 - **Endpoint:** `GET https://users-conectar.onrender.com/api/auth/me`
-- **Endpoint Local:** `GET /api/auth/me`
+- **Endpoint Local:** `GET /api/users/me`
+- **Exemplo de Requisição:**
+    ```json
+    {
+      ACCESS TOKEN
+    }
+    ```
+### Atualizar Usuário (Admin)
+- **Endpoint:** `PATCH https://users-conectar.onrender.com/api/users/id`
+- **Endpoint Local:** `PATCH /api/users/id`
+- **Exemplo de Requisição:**
+    ```json
+    {
+      "name": "example",
+      "email": "example@example.com",
+      "password": "example",
+      "role": "admin ou user",
+    }
+    ```
+    
+### Atualizar Usuário (Admin)
+- **Endpoint:** `DELETE https://users-conectar.onrender.com/api/users/id`
+- **Endpoint Local:** `DELETE /api/users/id`
 - **Exemplo de Requisição:**
     ```json
     {
