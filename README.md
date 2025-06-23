@@ -34,6 +34,71 @@ Uma ferramenta interna para gerenciar usuários da Conéctar, com foco em segura
 - Login Google
 - Swagger para documentação
 
+## Endpoints Exemplo:
+
+### Cadastro de Usuários (User)
+- **Endpoint:** `POST https://users-conectar.onrender.com/api/auth/register`
+- **Endpoint Local:** `POST /api/auth/register`
+- **Exemplo de Requisição:**
+    ```json
+    {
+      "name": "example",
+      "email": "example@example.com",
+      "password": "example",
+    }
+    ```
+### Cadastro de Usuários (Admin)
+- **Endpoint:** `POST https://users-conectar.onrender.com/api/auth/create-admin`
+- **Endpoint Local:** `POST /api/auth/create-admin`
+- **Exemplo de Requisição:**
+    ```json
+    {
+      "name": "example",
+      "email": "example@example.com",
+      "password": "example",
+    }
+    ```
+    
+### Login de Usuários (User & Admin)
+- **Endpoint:** `POST https://users-conectar.onrender.com/api/auth/login`
+- **Endpoint Local:** `POST /api/auth/login`
+- **Exemplo de Requisição:**
+    ```json
+    {
+      "email": "example@example.com",
+      "password": "securepassword",
+    }
+    ```
+
+### Usuários inativos (Admin)
+- **Endpoint:** `GET https://users-conectar.onrender.com/api/users/inactive`
+- **Endpoint Local:** `GET /api/users/inactive`
+- **Exemplo de Requisição:**
+    ```json
+    {
+      ACCESS TOKEN
+    }
+    ```
+
+### Todos os Usuários (Admin)
+- **Endpoint:** `GET https://users-conectar.onrender.com/api/users`
+- **Endpoint Local:** `GET /api/users`
+- **Exemplo de Requisição:**
+    ```json
+    {
+      ACCESS TOKEN
+    }
+    ```
+### Um Usuários (User & Admin)
+- **Endpoint:** `GET https://users-conectar.onrender.com/api/auth/me`
+- **Endpoint Local:** `GET /api/auth/me`
+- **Exemplo de Requisição:**
+    ```json
+    {
+      ACCESS TOKEN
+    }
+    ```
+
 ## Testes
 Execute `npm run test` para rodar os testes unitários.
 
