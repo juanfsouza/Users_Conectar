@@ -1,4 +1,8 @@
+<div align="center">
+    
 # Users Manager - Conéctar
+
+</div>
 
 ## Introdução
 Uma ferramenta interna para gerenciar usuários da Conéctar, com foco em segurança e escalabilidade.
@@ -8,7 +12,7 @@ Uma ferramenta interna para gerenciar usuários da Conéctar, com foco em segura
 - PostgreSQL 15+
 - Variáveis de ambiente em `.env`
 
-## Instalação
+## 🛠 Instalação
 1. Clone o repositório: `git clone https://github.com/juanfsouza/Users_Conectar`
 2. Instale as dependências: `cd backend && npm install`
 3. Configure o `.env` com as variáveis necessárias.
@@ -17,7 +21,7 @@ Uma ferramenta interna para gerenciar usuários da Conéctar, com foco em segura
 ## Execução
 - Backend: `npm run start:dev`
 
-## Estrutura do Projeto
+## 🏗️ Estrutura do Projeto
 - `src/auth`: Endpoits auth e google.
 - `src/users`: Crud users.
 - `src/domain`: Entidades e interfaces.
@@ -26,7 +30,7 @@ Uma ferramenta interna para gerenciar usuários da Conéctar, com foco em segura
 - `src/seed`: Criação de conta para admin.
 - `test`: Testes.
 
-## Funcionalidades
+## 🚀 Funcionalidades
 - CRUD de usuários com permissões (admin/user).
 - Filtros e ordenação.
 - Notificações de usuários inativos.
@@ -124,22 +128,20 @@ Uma ferramenta interna para gerenciar usuários da Conéctar, com foco em segura
 ## Testes
 Execute `npm run test` para rodar os testes unitários.
 
-## Decisões de Design
-- Uso de JWT com cookies HTTP-only para segurança.
-- TypeORM para persistência escalável.
-
-## Decisões de Design
+## 🎯 Decisões de Design
 
 - JWT armazenado em cookies HTTP-only para segurança contra XSS e CSRF
 - Banco de dados PostgreSQL com TypeORM e suporte a migrações
 - Arquitetura limpa separando domínio, aplicação e infraestrutura
+- Uso de JWT com cookies HTTP-only para segurança.
+- TypeORM para persistência escalável.
 
-## Deploy
+## 📦 Deploy
 
 - Frontend Vercel: https://users-manager-frontend.vercel.app/
 - Backend Render: https://users-conectar.onrender.com
 
-obs: provavelmente backend não vai ta funcionando por causa das regras do render, mas se for testar me manda uma mensagem no whatsapp que eu faço restart do servidor.
+⚠️ OBS: provavelmente backend não vai ta funcionando por causa das regras do render, mas se for testar me manda uma mensagem no whatsapp que eu faço restart do servidor.
 
 Conta: Admin
 ```json
