@@ -79,9 +79,9 @@ Uma ferramenta interna para gerenciar usuários da Conéctar, com foco em segura
 - **Endpoint Local:** `GET /api/users/inactive`
 - **Exemplo de Requisição:**
     ```json
-    {
+   
       ACCESS TOKEN
-    }
+    
     ```
 
 ### Todos os Usuários (Admin)
@@ -89,18 +89,18 @@ Uma ferramenta interna para gerenciar usuários da Conéctar, com foco em segura
 - **Endpoint Local:** `GET /api/users`
 - **Exemplo de Requisição:**
     ```json
-    {
+    
       ACCESS TOKEN
-    }
+    
     ```
 ### Um Usuários (User & Admin)
 - **Endpoint:** `GET https://users-conectar.onrender.com/api/auth/me`
 - **Endpoint Local:** `GET /api/users/me`
 - **Exemplo de Requisição:**
     ```json
-    {
+    
       ACCESS TOKEN
-    }
+    
     ```
 ### Atualizar Usuário (Admin)
 - **Endpoint:** `PATCH https://users-conectar.onrender.com/api/users/id`
@@ -120,9 +120,9 @@ Uma ferramenta interna para gerenciar usuários da Conéctar, com foco em segura
 - **Endpoint Local:** `DELETE /api/users/id`
 - **Exemplo de Requisição:**
     ```json
-    {
+    
       ACCESS TOKEN
-    }
+    
     ```
 
 ## Testes
