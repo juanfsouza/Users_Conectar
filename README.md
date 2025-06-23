@@ -141,7 +141,7 @@ Execute `npm run test` para rodar os testes unitários.
 
 obs: provavelmente backend não vai ta funcionando por causa das regras do render, mas se for testar me manda uma mensagem no whatsapp que eu faço restart do servidor.
 
-Consta: Admin
+Conta: Admin
 ```json
   "email": "admin123@example.com"
   "password": "admin123@"
